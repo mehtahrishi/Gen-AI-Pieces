@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCU and DCEU Character Randomizer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://miro.medium.com/v2/resize:fit:1400/1*ax6FFwwUw46dvaflVUv1Wg.jpeg'); /* Replace with your background image URL */
+            background-size: cover;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px; /* Rounded corners */
+            text-align: center;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #characterImage {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Image shadow */
+            display: none; /* Initially hidden */
+        }
+
+        .stats-container {
+            display: flex;
+            flex-direction: column; /* Stack bars vertically */
+            width: 100%;
+            margin-bottom: 15px;
+            display: none; /* Initially hidden */
+        }
+
+        .strength-bar,
+        .aura-bar {
+            width: 100%; /* Full width */
+            height: 20px; /* Height of the bars */
+            border-radius: 5px;
+            margin-bottom: 5px;
+            transition: width 0.5s ease-in-out;
+            position: relative; /* Add position relative */
+        }
+
+        .strength-bar {
+            background: rgba(255, 0, 0, 0.7); /* Semi-transparent red */
+        }
+        .strength-bar::after {
+            content: "Strength"; /* The text */
+            position: absolute;
+            color: white; /* Text color */
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .aura-bar {
+            background: rgba(0, 0, 255, 0.7); /* Semi-transparent blue */
+        }
+
+        .aura-bar::after {
+            content: "Aura"; /* The text */
+            position: absolute;
+            color: white; /* Text color */
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .bar-title {
+            font-size: 12px;
+            position: absolute;
+            top: -20px;
+            width: 100%;
+            text-align: center;
+            left: 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(to right, red 50%, blue 50%); /* Half red and half blue */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative; /* Position relative for pseudo-elements */
+            overflow: hidden; /* Hide overflow for the hover effect */
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, blue 50%, red 50%); /* Reverse colors on hover */
+        }
+
+        .character-description {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: left;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card" id="characterCard">
+    <h2 id="characterName">Choose Your Character :></h2>
+    <p id="universe">MCU ⚡ DCEU</p>
+    <img id="characterImage" src="" alt="Character Image" />
+    <div class="stats-container" id="statsContainer">
+        <div class="strength-bar" id="strengthBar">
+            <span class="bar-title"></span>
+        </div>
+        <div class="aura-bar" id="auraBar">
+            <span class="bar-title"></span>
+        </div>
+    </div>
+    <div class="character-description" id="characterDescription">
+        <!-- Description will be populated here -->
+    </div><br>
+    <button onclick="getRandomCharacter()">Who are you?</button>
+</div>
+
+<script>
+    const characters = [
+    { name: "Iron Man", universe: "MCU", strength: 80, power: 75, aura: 60, backgroundImage: 'https://pngimg.com/d/ironman_PNG50.png', description: "Genius, billionaire, playboy, philanthropist." },
+    { name: "Captain America", universe: "MCU", strength: 85, power: 80, aura: 70, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/46e6b448-76a4-4f59-af76-185e8b320111/ddukrdu-4fc7fe18-b3c3-47ab-a701-894ff7e879fc.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzQ2ZTZiNDQ4LTc2YTQtNGY1OS1hZjc2LTE4NWU4YjMyMDExMVwvZGR1a3JkdS00ZmM3ZmUxOC1iM2MzLTQ3YWItYTcwMS04OTRmZjdlODc5ZmMucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.46-txiD5jB6GWqPVKHxMkgUGhKIJ6JCaSgYJGcTUY8Q', description: "Super soldier with a strong sense of justice." },
+    { name: "Thor", universe: "MCU", strength: 95, power: 90, aura: 85, backgroundImage: 'https://www.pngkey.com/png/full/18-182726_clip-library-free-cliparts-download-clip-art-on.png', description: "God of Thunder, wielder of Mjolnir." },
+    { name: "Hulk", universe: "MCU", strength: 90, power: 85, aura: 75, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/46e6b448-76a4-4f59-af76-185e8b320111/ddukshn-11beabaa-abb0-4051-a074-c104fd68250b.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzQ2ZTZiNDQ4LTc2YTQtNGY1OS1hZjc2LTE4NWU4YjMyMDExMVwvZGR1a3Nobi0xMWJlYWJhYS1hYmIwLTQwNTEtYTA3NC1jMTA0ZmQ2ODI1MGIucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.7JCqG1E5_ALe6iR7X5jVlMnyHd9jNDa65GjeWYhQFe0', description: "The strongest Avenger, fueled by rage." },
+    { name: "Black Widow", universe: "MCU", strength: 70, power: 65, aura: 65, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/46e6b448-76a4-4f59-af76-185e8b320111/ddusmmr-49d8ecdf-ec01-4849-bd21-cf42e238ee56.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzQ2ZTZiNDQ4LTc2YTQtNGY1OS1hZjc2LTE4NWU4YjMyMDExMVwvZGR1c21tci00OWQ4ZWNkZi1lYzAxLTQ4NDktYmQyMS1jZjQyZTIzOGVlNTYucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.olw3HiLBMK0OJiyt4TVj4o4OZn-VGfjJn37oR2pzfJQ', description: "Master spy and expert martial artist." },
+    { name: "Spider-Man", universe: "MCU", strength: 75, power: 85, aura: 80, backgroundImage: 'https://pngfre.com/wp-content/uploads/spider-man-png-from-pngfre-45-1-260x300.png', description: "Friendly neighborhood superhero with spider-like abilities." },
+    { name: "Doctor Strange", universe: "MCU", strength: 80, power: 95, aura: 90, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/0f091ec3-dbfb-48b4-b63c-d4af1b16e6dd/dfgr3w7-e74cd893-794a-4825-8bdf-0af0a2654051.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzBmMDkxZWMzLWRiZmItNDhiNC1iNjNjLWQ0YWYxYjE2ZTZkZFwvZGZncjN3Ny1lNzRjZDg5My03OTRhLTQ4MjUtOGJkZi0wYWYwYTI2NTQwNTEucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.lYv3gWeTu0QAEeZ_gM-mLJRPtKAruqEUXtFF0EsFarw', description: "Master of the mystic arts." },
+    { name: "Black Panther", universe: "MCU", strength: 85, power: 80, aura: 80, backgroundImage: 'https://pngfre.com/wp-content/uploads/Black-Panther-16.png', description: "King of Wakanda, enhanced by the Heart-Shaped Herb." },
+    { name: "Ant-Man", universe: "MCU", strength: 70, power: 75, aura: 60, backgroundImage: 'https://www.pngplay.com/wp-content/uploads/12/Ant-Man-Marvel-PNG-Pic-Background.png', description: "Size-shifting hero with a heart of gold." },
+    { name: "Captain Marvel", universe: "MCU", strength: 95, power: 95, aura: 90, backgroundImage: 'https://freepngimg.com/save/37605-captain-marvel/576x720', description: "Cosmic-powered warrior with immense strength." },
+    { name: "Wonder Woman", universe: "DCEU", strength: 90, power: 90, aura: 80, backgroundImage: 'https://gpng.net/wp-content/uploads/Angry-Wonder-Woman-png.png', description: "Amazonian warrior princess with divine power." },
+    { name: "Batman", universe: "DCEU", strength: 75, power: 85, aura: 50, backgroundImage: 'https://www.pngplay.com/wp-content/uploads/6/Comic-Batman-Standing-Vector-Transparent-PNG.png', description: "Gotham’s Dark Knight, master strategist." },
+    { name: "Aquaman", universe: "DCEU", strength: 80, power: 85, aura: 75, backgroundImage: 'https://static.wikia.nocookie.net/p__/images/5/58/Aquaman_%28Superman-_TAS%29.png/revision/latest?cb=20200625032102&path-prefix=protagonist', description: "King of Atlantis, master of the seas." },
+    { name: "Flash", universe: "DCEU", strength: 70, power: 95, aura: 85, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/46e6b448-76a4-4f59-af76-185e8b320111/de2l2er-1d95ccf3-0ab8-4a84-9625-1f2daa563350.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzQ2ZTZiNDQ4LTc2YTQtNGY1OS1hZjc2LTE4NWU4YjMyMDExMVwvZGUybDJlci0xZDk1Y2NmMy0wYWI4LTRhODQtOTYyNS0xZjJkYWE1NjMzNTAucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.l3l8XQqZAC9J75dnHR-Bj4yBAjwYussuIGymQg4WAQw', description: "Fastest man alive, master of the Speed Force." },
+    { name: "Green Lantern", universe: "DCEU", strength: 80, power: 85, aura: 70, backgroundImage: 'https://static.wikia.nocookie.net/vsbattles/images/1/1a/Green_Lantern_%28John_Stewart%29_DCAU.webp/revision/latest?cb=20220121163435', description: "Wielder of the Green Lantern Ring." },
+    { name: "Cyborg", universe: "DCEU", strength: 75, power: 80, aura: 65, backgroundImage: 'https://pngimg.com/d/cyborg_PNG32.png', description: "Half-man, half-machine, fully heroic." },
+    { name: "Shazam", universe: "DCEU", strength: 90, power: 95, aura: 80, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/6c97c05e-4803-406f-9a76-e27903e6cad2/dfs9tnl-9dd64f70-cca7-41ba-8030-0d62d06904b1.png/v1/fill/w_725,h_1101/transparent_shazam_render_by_ianeggz_dfs9tnl-pre.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTM1NCIsInBhdGgiOiJcL2ZcLzZjOTdjMDVlLTQ4MDMtNDA2Zi05YTc2LWUyNzkwM2U2Y2FkMlwvZGZzOXRubC05ZGQ2NGY3MC1jY2E3LTQxYmEtODAzMC0wZDYyZDA2OTA0YjEucG5nIiwid2lkdGgiOiI8PTg5MiJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.4GLHBZoiyFCUFQXuSWDW5HahVyH3eJUywUBwxIoUuRE', description: "The magical champion with the power of gods." },
+    { name: "Superman", universe: "DCEU", strength: 100, power: 100, aura: 95, backgroundImage: 'https://www.pngarts.com/files/3/Cartoon-Superman-Transparent-Images.png', description: "The Man of Steel, Earth's greatest hero." },
+    { name: "Green Arrow", universe: "DCEU", strength: 70, power: 80, aura: 60, backgroundImage: 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/f359881d-6bb2-4391-aba6-779f7084edd4/da47jjd-ae2eb11a-99c7-4106-aeed-7332e7f00b25.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcL2YzNTk4ODFkLTZiYjItNDM5MS1hYmE2LTc3OWY3MDg0ZWRkNFwvZGE0N2pqZC1hZTJlYjExYS05OWM3LTQxMDYtYWVlZC03MzMyZTdmMDBiMjUucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.EdoZEC8iHx3zbTRmVquZGcbK0Z_giLR_sQaYXuLAe_M', description: "Expert archer and vigilante." },
+    { name: "Martian Manhunter", universe: "DCEU", strength: 85, power: 95, aura: 90, backgroundImage: 'https://www.pngplay.com/wp-content/uploads/12/Martian-Manhunter-Transparent-Free-PNG.png', description: "Alien warrior with incredible powers." }
+];
+
+
+
+    function getRandomCharacter() {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        const character = characters[randomIndex];
+
+        document.getElementById("characterName").innerText = character.name;
+        document.getElementById("universe").innerText = character.universe;
+
+        const characterImage = document.getElementById("characterImage");
+        characterImage.src = character.backgroundImage;
+        characterImage.alt = character.name;
+
+        const strengthPercentage = character.strength + '%';
+        const auraPercentage = character.aura + '%';
+
+        const strengthBar = document.getElementById("strengthBar");
+        const auraBar = document.getElementById("auraBar");
+
+        strengthBar.style.width = strengthPercentage;
+        auraBar.style.width = auraPercentage;
+
+        // Show the image and stats container
+        characterImage.style.display = 'block';
+        document.getElementById("statsContainer").style.display = 'flex';
+        
+        // Update character description
+        document.getElementById("characterDescription").innerHTML = "<strong>" + character.description + "</strong>";
+    }
+</script>
+
+</body>
+</html>
